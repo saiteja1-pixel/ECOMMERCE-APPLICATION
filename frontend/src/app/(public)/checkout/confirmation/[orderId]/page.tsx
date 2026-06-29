@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, ShoppingBag, ArrowRight, MapPin } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 import { orderService } from "@/services/order-service";
 import { ROUTES } from "@/constants/routes";
 
@@ -20,7 +21,8 @@ export default async function OrderConfirmationPage({ params }: ConfirmationPage
   let order = null;
 
   try {
-    order = await orderService.getOrderById(orderId);
+    const supabase = await createClient();
+    order = await orderService.getOrderById(orderId, supabase);
   } catch (err) {
     console.error("Order confirmation fetch failed:", err);
     return notFound();

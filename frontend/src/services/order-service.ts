@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Address } from "@/types/address";
 import type { CartItem } from "@/types/cart";
 import type { Order, OrderStatusHistory } from "@/types/order";
@@ -35,9 +36,9 @@ export const orderService = {
     return data.order_ids as string[];
   },
 
-  async getOrderById(id: string) {
+  async getOrderById(id: string, supabaseClient?: SupabaseClient) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = createClient() as any;
+    const supabase = (supabaseClient || createClient()) as any;
     
     // Retrieve order detail
     const { data: orderData, error: orderError } = await supabase
