@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js build output
+.next/
+out/
+build/
+
+# Environment variables (SENSITIVE)
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+.env*.local
+
+# OS / System files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Vercel deployments
+.vercel
