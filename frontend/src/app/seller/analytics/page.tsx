@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, DollarSign, ShoppingCart, Package, BarChart3, TrendingUp, Award } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { KPICard } from "@/components/shared/kpi-card";
 import { LineChart } from "@/components/charts/line-chart";
 import { BarChart } from "@/components/charts/bar-chart";
@@ -54,16 +53,16 @@ export default function SellerAnalyticsPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout role="seller">
+      <>
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout role="seller">
+    <>
       <div className="space-y-8 font-sans pb-12">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading">
@@ -160,6 +159,6 @@ export default function SellerAnalyticsPage() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

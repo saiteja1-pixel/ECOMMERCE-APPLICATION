@@ -14,7 +14,6 @@ import {
   ClipboardList,
   Store,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SlideOverPanel } from "@/components/shared/slide-over-panel";
@@ -234,7 +233,7 @@ export default function AdminOrdersPage() {
   ];
 
   return (
-    <DashboardLayout role="admin">
+    <>
       <div className="space-y-6 font-sans select-none pb-10">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="space-y-1">
@@ -482,6 +481,6 @@ export default function AdminOrdersPage() {
           )}
         </SlideOverPanel>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

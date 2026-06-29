@@ -14,7 +14,6 @@ import {
   Loader2,
   Image as ImageIcon,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { inventoryService, type InventoryItem, type StockHistoryItem } from "@/services/inventory-service";
@@ -229,7 +228,7 @@ export default function SellerInventoryPage({ searchParams }: { searchParams?: P
   ];
 
   return (
-    <DashboardLayout role="seller">
+    <>
       <div className="space-y-6 font-sans select-none pb-12">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading">
@@ -511,6 +510,6 @@ export default function SellerInventoryPage({ searchParams }: { searchParams?: P
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

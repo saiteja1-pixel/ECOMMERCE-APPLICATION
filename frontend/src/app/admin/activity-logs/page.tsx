@@ -8,7 +8,6 @@ import {
   Activity,
   User,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/tables/data-table";
 import { Badge } from "@/components/ui/badge";
 import { activityLogService, type ActivityLog } from "@/services/activity-log-service";
@@ -133,7 +132,7 @@ export default function AdminActivityLogsPage() {
   ];
 
   return (
-    <DashboardLayout role="admin">
+    <>
       <div className="space-y-6 font-sans select-none pb-12">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading flex items-center gap-2">
@@ -227,6 +226,6 @@ export default function AdminActivityLogsPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

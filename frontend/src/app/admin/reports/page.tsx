@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/tables/data-table";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -446,7 +445,7 @@ export default function AdminReportsPage() {
   };
 
   return (
-    <DashboardLayout role="admin">
+    <>
       <div className="space-y-6 font-sans select-none pb-20 max-w-7xl">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading flex items-center gap-2">
@@ -740,6 +739,6 @@ export default function AdminReportsPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }
