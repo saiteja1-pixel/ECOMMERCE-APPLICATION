@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rubik, Nunito_Sans } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { Chatbot } from "@/components/shared/chatbot";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <QueryProvider>
           {children}
+          <Chatbot />
           <Toaster position="top-right" richColors />
         </QueryProvider>
       </body>
