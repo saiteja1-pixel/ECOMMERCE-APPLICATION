@@ -7,7 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgotPasswordSchema } from "@/lib/validators/auth";
@@ -41,11 +41,10 @@ export default function ForgotPasswordPage() {
         description: "Check your inbox for a password reset link.",
       });
     } catch (error) {
-      const err = error as Error;
       // Security-safe fallback: don't explicitly fail if email doesn't exist,
       // but if there's a strict API error (e.g. rate limit), show it.
       toast.error("Error sending reset email", {
-        description: err.message || "Something went wrong. Please try again.",
+        description: getErrorMessage(error, "Something went wrong. Please try again."),
       });
     } finally {
       setIsLoading(false);

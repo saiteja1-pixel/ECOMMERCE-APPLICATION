@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { resetPasswordSchema } from "@/lib/validators/auth";
 import { authService } from "@/services/auth-service";
 import { ROUTES } from "@/constants/routes";
+import { getErrorMessage } from "@/lib/utils";
 import type { z } from "zod";
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
@@ -41,9 +42,8 @@ export default function ResetPasswordPage() {
       });
       router.push(ROUTES.LOGIN);
     } catch (error) {
-      const err = error as Error;
       toast.error("Password reset failed", {
-        description: err.message || "An error occurred. Please try again.",
+        description: getErrorMessage(error, "An error occurred. Please try again."),
       });
     } finally {
       setIsLoading(false);

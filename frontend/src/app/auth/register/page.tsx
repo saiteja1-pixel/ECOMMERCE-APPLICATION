@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { registerSchema } from "@/lib/validators/auth";
 import { authService } from "@/services/auth-service";
 import { ROUTES } from "@/constants/routes";
+import { getErrorMessage } from "@/lib/utils";
 import type { z } from "zod";
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -68,9 +69,8 @@ export default function RegisterPage() {
         router.push(ROUTES.HOME);
       }
     } catch (error) {
-      const err = error as Error;
       toast.error("Registration failed", {
-        description: err.message || "An error occurred during sign up.",
+        description: getErrorMessage(error, "An error occurred during sign up."),
       });
     } finally {
       setIsLoading(false);

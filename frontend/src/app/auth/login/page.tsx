@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { loginSchema } from "@/lib/validators/auth";
 import { authService } from "@/services/auth-service";
 import { ROUTES } from "@/constants/routes";
+import { getErrorMessage } from "@/lib/utils";
 import type { UserProfile } from "@/types/auth";
 import type { z } from "zod";
 
@@ -111,9 +112,8 @@ function LoginForm() {
         router.push(redirectTo);
       }
     } catch (error) {
-      const err = error as Error;
       toast.error("Authentication failed", {
-        description: err.message || "Invalid credentials. Please try again.",
+        description: getErrorMessage(error, "Invalid credentials. Please try again."),
       });
     } finally {
       setIsLoading(false);
