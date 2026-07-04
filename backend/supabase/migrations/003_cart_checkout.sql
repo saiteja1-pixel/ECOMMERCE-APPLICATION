@@ -304,4 +304,4 @@ BEGIN
     'order_ids', to_jsonb(v_created_order_ids)
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

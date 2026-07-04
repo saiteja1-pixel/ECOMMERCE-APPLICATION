@@ -32,7 +32,7 @@ BEGIN
   GROUP BY date_trunc('day', o.created_at)
   ORDER BY period ASC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 2. Generate Orders Report
@@ -69,7 +69,7 @@ BEGIN
     AND (p_seller_id IS NULL OR o.seller_id = p_seller_id)
   ORDER BY o.created_at DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 3. Generate Products Report
@@ -111,7 +111,7 @@ BEGIN
   GROUP BY pr.id, pr.name, pr.sku, c.name, s.business_name, s.full_name, pr.price, pr.stock, pr.status
   ORDER BY revenue DESC, units_sold DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 4. Generate Sellers Report
@@ -142,7 +142,7 @@ BEGIN
     AND (p_status IS NULL OR p_status = 'all' OR p.status = p_status)
   ORDER BY total_revenue DESC, total_orders DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 5. Generate Customers Report
@@ -176,4 +176,4 @@ BEGIN
   GROUP BY p.id, p.full_name, p.email, p.created_at, p.status
   ORDER BY total_spent DESC, total_orders DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

@@ -67,7 +67,7 @@ BEGIN
   INSERT INTO notifications (user_id, type, title, message, link)
   VALUES (p_user_id, p_type, p_title, p_message, p_link);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE FUNCTION log_activity_rpc(
   p_user_id UUID,
@@ -82,7 +82,7 @@ BEGIN
   INSERT INTO activity_logs (user_id, user_role, action, entity_type, entity_id, metadata)
   VALUES (p_user_id, p_user_role, p_action, p_entity_type, p_entity_id, p_metadata);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 4. Database Triggers for Automated Dispatches
@@ -129,7 +129,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER order_inserted_trigger
 AFTER INSERT ON orders
@@ -191,7 +191,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER order_status_updated_trigger
 AFTER UPDATE OF status ON orders
@@ -229,7 +229,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER product_stock_updated_trigger
 AFTER UPDATE OF stock ON products
@@ -321,7 +321,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER profile_changed_trigger
 AFTER INSERT OR UPDATE ON profiles
@@ -401,7 +401,7 @@ BEGIN
 
   RETURN COALESCE(NEW, OLD);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER product_changed_trigger
 AFTER INSERT OR UPDATE OR DELETE ON products
@@ -457,7 +457,7 @@ BEGIN
 
   RETURN COALESCE(NEW, OLD);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER category_changed_trigger
 AFTER INSERT OR UPDATE OR DELETE ON categories
