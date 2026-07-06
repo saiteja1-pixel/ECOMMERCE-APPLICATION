@@ -18,7 +18,7 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { inventoryService, type InventoryItem, type StockHistoryItem } from "@/services/inventory-service";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import { cn, handleImageError } from "@/lib/utils";
 
 // Modal dialogue helper elements
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -148,7 +148,7 @@ export default function SellerInventoryPage({ searchParams }: { searchParams?: P
         <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-border bg-slate-50 shrink-0">
           {row.original.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={row.original.image_url} alt={row.original.name} className="h-full w-full object-cover" />
+            <img src={row.original.image_url} alt={row.original.name} className="h-full w-full object-cover" onError={handleImageError} />
           ) : (
             <ImageIcon className="h-4.5 w-4.5 text-slate-300 mx-auto mt-2.5" />
           )}

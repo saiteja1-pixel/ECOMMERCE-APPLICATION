@@ -19,6 +19,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/language-context";
+import { handleImageError } from "@/lib/utils";
 
 export default function CustomerDashboardPage() {
   const { profile } = useAuth();
@@ -211,7 +212,7 @@ export default function CustomerDashboardPage() {
                     <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-border bg-slate-50 shrink-0 flex items-center justify-center text-slate-350">
                       {o.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={o.image_url} alt={o.product_name} className="h-full w-full object-cover" />
+                        <img src={o.image_url} alt={o.product_name} className="h-full w-full object-cover" onError={handleImageError} />
                       ) : (
                         <ShoppingBag className="h-5 w-5" />
                       )}

@@ -20,7 +20,7 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { productService } from "@/services/product-service";
 import type { Product } from "@/types/product";
-import { cn } from "@/lib/utils";
+import { cn, handleImageError } from "@/lib/utils";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -141,7 +141,7 @@ export default function AdminProductsPage() {
           <div className="h-10 w-10 border border-border bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center">
             {url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={url} alt={name} className="h-full w-full object-cover" />
+              <img src={url} alt={name} className="h-full w-full object-cover" onError={handleImageError} />
             ) : (
               <ImageIcon className="h-5 w-5 text-muted-foreground" />
             )}

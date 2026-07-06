@@ -21,7 +21,7 @@ import { orderService } from "@/services/order-service";
 import type { Order, OrderStatusHistory } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn, handleImageError } from "@/lib/utils";
 
 const tabs = [
   { id: "all", label: "All Orders" },
@@ -385,7 +385,7 @@ export default function SellerOrdersPage() {
                         <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-border bg-slate-50 shrink-0">
                           {item.product_image && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={item.product_image} alt={item.product_name} className="h-full w-full object-cover" />
+                            <img src={item.product_image} alt={item.product_name} className="h-full w-full object-cover" onError={handleImageError} />
                           )}
                         </div>
                         <div className="overflow-hidden">

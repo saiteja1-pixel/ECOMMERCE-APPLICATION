@@ -26,7 +26,7 @@ import { orderService } from "@/services/order-service";
 import { addressSchema, type AddressFormValues } from "@/lib/validators/checkout";
 import type { Address } from "@/types/address";
 import type { CartItem } from "@/types/cart";
-import { cn } from "@/lib/utils";
+import { cn, handleImageError } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 const loadRazorpayScript = () => {
@@ -800,6 +800,7 @@ export default function CheckoutPage() {
                             src={item.product_image}
                             alt={item.product_name}
                             className="h-full w-full object-cover"
+                            onError={handleImageError}
                           />
                         </div>
                         <div>

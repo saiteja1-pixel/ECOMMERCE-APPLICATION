@@ -95,21 +95,21 @@ function LoginForm() {
 
       // Role-based routing
       if (profile.role === "admin") {
-        router.push(ROUTES.ADMIN_DASHBOARD);
+        window.location.href = ROUTES.ADMIN_DASHBOARD;
       } else if (profile.role === "seller") {
         if (profile.status === "active") {
-          router.push(ROUTES.SELLER_DASHBOARD);
+          window.location.href = ROUTES.SELLER_DASHBOARD;
         } else if (profile.status === "pending") {
-          router.push(ROUTES.SELLER_PENDING);
+          window.location.href = ROUTES.SELLER_PENDING;
         } else if (profile.status === "suspended") {
-          router.push(ROUTES.SELLER_SUSPENDED);
+          window.location.href = ROUTES.SELLER_SUSPENDED;
         } else {
-          router.push(ROUTES.HOME);
+          window.location.href = ROUTES.HOME;
         }
       } else {
         // Customer or fallback
         const redirectTo = searchParams.get("redirect") || ROUTES.HOME;
-        router.push(redirectTo);
+        window.location.href = redirectTo;
       }
     } catch (error) {
       toast.error("Authentication failed", {

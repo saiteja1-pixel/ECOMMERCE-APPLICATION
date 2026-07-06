@@ -89,7 +89,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
     try {
       await authService.signOut();
       toast.success("Logged out successfully");
-      router.push(ROUTES.LOGIN);
+      window.location.href = ROUTES.LOGIN;
     } catch (error) {
       const err = error as Error;
       toast.error("Logout failed", { description: err.message });

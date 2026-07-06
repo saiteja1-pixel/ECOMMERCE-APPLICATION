@@ -69,3 +69,11 @@ export function getErrorMessage(error: any, fallback: string = "An unexpected er
   return message;
 }
 
+export const PRODUCT_IMAGE_FALLBACK = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="%23f1f5f9"/><path d="M35 38h30v24H35z" fill="none" stroke="%23cbd5e1" stroke-width="2"/><path d="M35 38l15 10 15-10" fill="none" stroke="%23cbd5e1" stroke-width="2"/><text x="50" y="75" font-family="system-ui,sans-serif" font-size="8" font-weight="bold" fill="%2394a3b8" text-anchor="middle">NO IMAGE</text></svg>`;
+
+export function handleImageError(e: React.SyntheticEvent<HTMLImageElement, Event>) {
+  const target = e.currentTarget;
+  target.onerror = null;
+  target.src = PRODUCT_IMAGE_FALLBACK;
+}
+

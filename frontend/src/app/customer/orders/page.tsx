@@ -15,7 +15,7 @@ import {
 import { StatusBadge } from "@/components/shared/status-badge";
 import { orderService } from "@/services/order-service";
 import type { Order } from "@/types/order";
-import { cn } from "@/lib/utils";
+import { cn, handleImageError } from "@/lib/utils";
 
 const tabs = [
   { id: "all", label: "All Orders" },
@@ -160,6 +160,7 @@ export default function CustomerOrdersPage() {
                               src={item.product_image}
                               alt={item.product_name}
                               className="h-full w-full object-cover"
+                              onError={handleImageError}
                             />
                           ) : (
                             <ShoppingBag className="h-5 w-5 text-slate-350 mx-auto mt-3" />

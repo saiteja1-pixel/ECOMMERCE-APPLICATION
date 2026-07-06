@@ -18,7 +18,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { OrderTimeline } from "@/components/shared/order-timeline";
 import { orderService } from "@/services/order-service";
 import type { Order, OrderStatusHistory } from "@/types/order";
-
+import { handleImageError } from "@/lib/utils";
 export default function CustomerOrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -150,6 +150,7 @@ export default function CustomerOrderDetailsPage() {
                           src={item.product_image}
                           alt={item.product_name}
                           className="h-full w-full object-cover group-hover/item:scale-105 transition-transform duration-300"
+                          onError={handleImageError}
                         />
                       ) : (
                         <ShoppingBag className="h-5 w-5 text-slate-350 mx-auto mt-4.5" />

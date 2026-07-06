@@ -5,6 +5,7 @@ import { CheckCircle2, ShoppingBag, ArrowRight, MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { orderService } from "@/services/order-service";
 import { ROUTES } from "@/constants/routes";
+import { SafeImage } from "@/components/shared/safe-image";
 
 export const metadata: Metadata = {
   title: "Order Confirmed - CommerceHub",
@@ -74,16 +75,12 @@ export default async function OrderConfirmationPage({ params }: ConfirmationPage
             <div key={item.id} className="p-6 flex items-center justify-between gap-6">
               <div className="flex items-center gap-4 grow">
                 <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-border bg-slate-50 shrink-0">
-                  {item.product_image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.product_image}
-                      alt={item.product_name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <ShoppingBag className="h-6 w-6 text-slate-350 mx-auto" />
-                  )}
+                  <SafeImage
+                    src={item.product_image}
+                    alt={item.product_name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div>
                   <h4 className="font-bold text-xs text-foreground truncate max-w-md">{item.product_name}</h4>
