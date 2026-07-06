@@ -20,7 +20,7 @@ export const authService = {
     });
 
     if (authError) {
-      throw new Error(authError.message);
+      throw authError;
     }
 
     return authData;
@@ -35,17 +35,31 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
 
     return data;
+  },
+
+  async signInWithGoogle() {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
   },
 
   async signOut() {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
   },
 
@@ -58,7 +72,7 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
   },
 
@@ -70,14 +84,14 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
   },
 
   async getCurrentSession() {
     const supabase = createClient();
     const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return session;
   },
 
@@ -90,7 +104,7 @@ export const authService = {
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
 
     return data;

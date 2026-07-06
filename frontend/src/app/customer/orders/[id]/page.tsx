@@ -13,7 +13,7 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
-import { CustomerDashboardLayout } from "@/components/layout/customer-dashboard-layout";
+
 import { StatusBadge } from "@/components/shared/status-badge";
 import { OrderTimeline } from "@/components/shared/order-timeline";
 import { orderService } from "@/services/order-service";
@@ -82,11 +82,9 @@ export default function CustomerOrderDetailsPage() {
 
   if (isLoading) {
     return (
-      <CustomerDashboardLayout>
-        <div className="flex items-center justify-center py-20 font-sans">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-650" />
-        </div>
-      </CustomerDashboardLayout>
+      <div className="flex items-center justify-center py-20 font-sans">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-655" />
+      </div>
     );
   }
 
@@ -96,8 +94,7 @@ export default function CustomerOrderDetailsPage() {
   const canCancel = order.status === "pending" || order.status === "confirmed";
 
   return (
-    <CustomerDashboardLayout>
-      <div className="space-y-8 font-sans select-none pb-12">
+    <div className="space-y-8 font-sans select-none pb-12">
         {/* Header navigation bar */}
         <div className="flex items-center gap-3 border-b border-border pb-6">
           <Link href="/customer/orders" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-500 cursor-pointer">
@@ -143,36 +140,57 @@ export default function CustomerOrderDetailsPage() {
                 <h3 className="font-heading font-bold text-sm text-foreground">Ordered Products</h3>
               </div>
               
-              {order.items?.map((item) => (
-                <div key={item.id} className="p-6 flex items-center justify-between gap-6">
-                  <div className="flex items-center gap-4 grow">
+              {order.items?.map((item) => {
+                const itemContent = (
+                  <div className="flex items-center gap-4 grow group/item">
                     <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-border bg-slate-50 shrink-0">
                       {item.product_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.product_image}
                           alt={item.product_name}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover group-hover/item:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <ShoppingBag className="h-5 w-5 text-slate-350 mx-auto mt-4.5" />
                       )}
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs text-foreground truncate max-w-sm">{item.product_name}</h4>
-                      <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ${Number(item.price).toFixed(2)}</p>
+                      <h4 className="font-bold text-xs text-foreground truncate max-w-sm group-hover/item:text-purple-655 transition-colors">
+                        {item.product_name}
+                      </h4>
+                      <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ₹{Number(item.price).toFixed(2)}</p>
+                      {item.selected_configuration && (
+                        <div className="pt-0.5">
+                          <span className="text-[9px] text-purple-655 bg-purple-50 dark:bg-purple-950/20 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-950/30 inline-block font-semibold">
+                            Config: {item.selected_configuration}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <span className="font-sans font-bold text-sm text-foreground shrink-0">
-                    ${Number(item.total).toFixed(2)}
-                  </span>
-                </div>
-              ))}
+                );
+
+                return (
+                  <div key={item.id} className="p-6 flex items-center justify-between gap-6">
+                    {item.product_id ? (
+                      <Link href={`/products/${item.product_id}`} className="grow flex items-center cursor-pointer">
+                        {itemContent}
+                      </Link>
+                    ) : (
+                      itemContent
+                    )}
+                    <span className="font-sans font-bold text-sm text-foreground shrink-0 font-mono">
+                      ₹{Number(item.total).toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
 
               <div className="p-6 bg-slate-50/50 dark:bg-slate-900/10 space-y-2 text-xs text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-bold text-foreground font-mono">${Number(order.subtotal).toFixed(2)}</span>
+                  <span className="font-bold text-foreground font-mono">₹{Number(order.subtotal).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping Cost</span>
@@ -180,7 +198,7 @@ export default function CustomerOrderDetailsPage() {
                 </div>
                 <div className="border-t border-border pt-3 flex justify-between font-bold text-sm text-foreground">
                   <span>Total Amount (COD)</span>
-                  <span className="font-mono">${Number(order.total).toFixed(2)}</span>
+                  <span className="font-mono">₹{Number(order.total).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -223,6 +241,5 @@ export default function CustomerOrderDetailsPage() {
 
         </div>
       </div>
-    </CustomerDashboardLayout>
   );
 }

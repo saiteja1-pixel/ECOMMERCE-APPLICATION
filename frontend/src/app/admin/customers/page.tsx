@@ -13,7 +13,7 @@ import {
   Trash2,
   User,
   ShoppingBag,
-  DollarSign,
+  IndianRupee,
   Calendar,
   Mail,
   Phone,
@@ -323,11 +323,11 @@ export default function AdminCustomersPage() {
 
                 <div className="bg-slate-50/40 p-4 border border-border rounded-xl text-center">
                   <p className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 inline-block">
-                    <DollarSign className="h-4.5 w-4.5" />
+                    <IndianRupee className="h-4.5 w-4.5" />
                   </p>
                   <p className="text-[10px] text-muted-foreground font-semibold mt-1">Total Spent</p>
                   <p className="text-lg font-bold text-foreground font-mono leading-none mt-1">
-                    ${Number(selectedCustomer.total_spent || 0).toFixed(2)}
+                    ₹{Number(selectedCustomer.total_spent || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -414,8 +414,8 @@ export default function AdminCustomersPage() {
                     className={cn(
                       "rounded-lg h-9 text-xs font-bold cursor-pointer text-white",
                       actionType === "block" || actionType === "delete"
-                        ? "bg-red-650 hover:bg-red-750"
-                        : "bg-purple-650 hover:bg-purple-750"
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-purple-600 hover:bg-purple-700"
                     )}
                   >
                     {isSubmittingAction && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

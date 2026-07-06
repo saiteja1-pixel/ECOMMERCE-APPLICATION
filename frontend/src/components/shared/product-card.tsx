@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { SafeImage } from "./safe-image";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,36 @@ export function ProductCard({ product, onAddToCart, onWishlistRemoved }: Product
     : product.price;
 
   const isOutOfStock = product.stock === 0;
+
+  // Helper to count configurations
+  const variantText = useMemo(() => {
+    if (!product.configuration) return null;
+    try {
+      const lines = product.configuration.split("\n").map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        if (line.toLowerCase().startsWith("color:") || line.toLowerCase().startsWith("colour:")) {
+          const parts = line.split(":")[1].split("|").map(p => p.trim()).filter(Boolean);
+          if (parts.length > 1) {
+            return `+${parts.length} other colors/patterns`;
+          }
+        }
+      }
+      
+      let totalVariants = 0;
+      for (const line of lines) {
+        const parts = line.split(":")[1]?.split("|").map(p => p.trim()).filter(Boolean) || [];
+        if (parts.length > 1) {
+          totalVariants += parts.length;
+        }
+      }
+      if (totalVariants > 1) {
+        return `+${totalVariants} options available`;
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return null;
+  }, [product.configuration]);
 
   // Check wishlist state on mount
   useEffect(() => {
@@ -93,14 +123,16 @@ export function ProductCard({ product, onAddToCart, onWishlistRemoved }: Product
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300">
       {/* Image Gallery Wrapper */}
       <div className="relative aspect-4/3 w-full bg-muted overflow-hidden">
-        <Image
-          src={product.imageUrl}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-          priority={false}
-        />
+        <Link href={`/products/${product.id}`} className="relative block h-full w-full">
+          <SafeImage
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            priority={false}
+          />
+        </Link>
 
         {/* Sale Badge */}
         {hasDiscount && !isOutOfStock && (
@@ -165,6 +197,21 @@ export function ProductCard({ product, onAddToCart, onWishlistRemoved }: Product
           </Link>
         </h3>
 
+        {/* Description snippet */}
+        <p className="text-[11px] text-muted-foreground line-clamp-1 leading-normal font-sans">
+          {product.description}
+        </p>
+
+        {/* Option Variant link overlay (Amazon style) */}
+        {variantText && (
+          <Link 
+            href={`/products/${product.id}`} 
+            className="text-[10px] text-blue-600 hover:text-blue-500 font-semibold hover:underline block cursor-pointer transition-colors"
+          >
+            {variantText}
+          </Link>
+        )}
+
         {/* Rating Row */}
         <div className="flex items-center gap-1">
           <div className="flex items-center text-amber-500">
@@ -182,11 +229,11 @@ export function ProductCard({ product, onAddToCart, onWishlistRemoved }: Product
         <div className="flex items-end justify-between pt-1">
           <div className="flex items-center gap-1.5">
             <span className="text-base font-bold text-foreground font-sans">
-              ${discountedPrice.toFixed(2)}
+              ₹{discountedPrice.toFixed(2)}
             </span>
             {hasDiscount && (
               <span className="text-xs text-muted-foreground line-through font-sans">
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </span>
             )}
           </div>

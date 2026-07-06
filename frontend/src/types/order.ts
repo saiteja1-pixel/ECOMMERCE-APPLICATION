@@ -31,6 +31,7 @@ export interface OrderItem {
   quantity: number;
   price: number;
   total: number;
+  selected_configuration?: string | null;
 }
 
 export interface OrderStatusHistory {

@@ -44,13 +44,22 @@ export const productService = {
 
     if (error) throw new Error(error.message);
 
+    // Fetch rating aggregates
+    const { data: ratingsData } = await supabase.from("product_ratings").select("*");
+    const ratingsMap = new Map<string, any>((ratingsData || []).map((r: any) => [r.product_id, r]));
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name || "Uncategorized",
-      seller_name: item.profiles?.full_name || "Unknown Seller",
-      seller_business_name: item.profiles?.business_name || "N/A",
-    })) as Product[];
+    return data.map((item: any) => {
+      const rating = ratingsMap.get(item.id) || { average_rating: 0, reviews_count: 0 };
+      return {
+        ...item,
+        category_name: item.categories?.name || "Uncategorized",
+        seller_name: item.profiles?.full_name || "Unknown Seller",
+        seller_business_name: item.profiles?.business_name || "N/A",
+        average_rating: Number(rating.average_rating || 0),
+        reviews_count: Number(rating.reviews_count || 0),
+      };
+    }) as Product[];
   },
 
   async getProductById(id: string) {
@@ -68,11 +77,24 @@ export const productService = {
 
     if (error) throw new Error(error.message);
     
+    // Fetch rating
+    const { data: ratingData } = await supabase
+      .from("product_ratings")
+      .select("*")
+      .eq("product_id", id)
+      .maybeSingle();
+
+    const ratingInfo = ratingData as any;
+    const avgRating = ratingInfo ? Number(ratingInfo.average_rating) : 0;
+    const revCount = ratingInfo ? Number(ratingInfo.reviews_count) : 0;
+
     return {
       ...data,
       category_name: data.categories?.name || "Uncategorized",
       seller_name: data.profiles?.full_name || "Unknown",
       seller_business_name: data.profiles?.business_name || "N/A",
+      average_rating: avgRating,
+      reviews_count: revCount,
     } as Product;
   },
 
@@ -89,6 +111,7 @@ export const productService = {
         category_id: values.category_id,
         name: values.name,
         description: values.description,
+        configuration: values.configuration || null,
         sku: values.sku || null,
         price: values.price,
         discount: values.discount,
@@ -150,6 +173,7 @@ export const productService = {
         category_id: values.category_id,
         name: values.name,
         description: values.description,
+        configuration: values.configuration || null,
         sku: values.sku || null,
         price: values.price,
         discount: values.discount,
@@ -254,7 +278,6 @@ export const productService = {
     if (error) throw new Error(error.message);
   },
 
-  // Public Query operations
   async getProducts(filters: {
     category?: string;
     minPrice?: number;
@@ -264,6 +287,7 @@ export const productService = {
     sort?: string;
     page?: number;
     limit?: number;
+    minRating?: number;
   }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createClient() as any;
@@ -276,6 +300,7 @@ export const productService = {
       sort = "latest",
       page = 1,
       limit = 12,
+      minRating,
     } = filters;
 
     let query = supabase
@@ -284,7 +309,7 @@ export const productService = {
         *,
         categories (name),
         profiles (full_name, business_name)
-      `, { count: "exact" })
+      `)
       .eq("status", "active");
 
     if (category) {
@@ -312,23 +337,39 @@ export const productService = {
       query = query.order("created_at", { ascending: false });
     }
 
-    // Apply pagination bounds
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.range(from, to);
-
-    const { data, error, count } = await query;
+    const { data, error } = await query;
     if (error) throw new Error(error.message);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mapped = data.map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name || "Uncategorized",
-      seller_name: item.profiles?.full_name || "Unknown Seller",
-      seller_business_name: item.profiles?.business_name || "N/A",
-    })) as Product[];
+    // Fetch rating aggregates
+    const { data: ratingsData } = await supabase.from("product_ratings").select("*");
+    const ratingsMap = new Map<string, any>((ratingsData || []).map((r: any) => [r.product_id, r]));
 
-    return { products: mapped, count: count || 0 };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mapped = data.map((item: any) => {
+      const rating = ratingsMap.get(item.id) || { average_rating: 0, reviews_count: 0 };
+      return {
+        ...item,
+        category_name: item.categories?.name || "Uncategorized",
+        seller_name: item.profiles?.full_name || "Unknown Seller",
+        seller_business_name: item.profiles?.business_name || "N/A",
+        average_rating: Number(rating.average_rating || 0),
+        reviews_count: Number(rating.reviews_count || 0),
+      };
+    }) as Product[];
+
+    // Apply min rating filter if selected
+    if (minRating !== undefined && minRating > 0) {
+      mapped = mapped.filter((p) => (p.average_rating ?? 0) >= minRating);
+    }
+
+    const filteredCount = mapped.length;
+
+    // Apply pagination slicing
+    const from = (page - 1) * limit;
+    const to = from + limit;
+    const paginated = mapped.slice(from, to);
+
+    return { products: paginated, count: filteredCount };
   },
 
   async getFeaturedProducts(limit = 8) {
@@ -349,13 +390,22 @@ export const productService = {
 
     if (error) throw new Error(error.message);
 
+    // Fetch rating aggregates
+    const { data: ratingsData } = await supabase.from("product_ratings").select("*");
+    const ratingsMap = new Map<string, any>((ratingsData || []).map((r: any) => [r.product_id, r]));
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name || "Uncategorized",
-      seller_name: item.profiles?.full_name || "Unknown Seller",
-      seller_business_name: item.profiles?.business_name || "N/A",
-    })) as Product[];
+    return data.map((item: any) => {
+      const rating = ratingsMap.get(item.id) || { average_rating: 0, reviews_count: 0 };
+      return {
+        ...item,
+        category_name: item.categories?.name || "Uncategorized",
+        seller_name: item.profiles?.full_name || "Unknown Seller",
+        seller_business_name: item.profiles?.business_name || "N/A",
+        average_rating: Number(rating.average_rating || 0),
+        reviews_count: Number(rating.reviews_count || 0),
+      };
+    }) as Product[];
   },
 
   async getNewArrivals(limit = 8) {
@@ -375,13 +425,22 @@ export const productService = {
 
     if (error) throw new Error(error.message);
 
+    // Fetch rating aggregates
+    const { data: ratingsData } = await supabase.from("product_ratings").select("*");
+    const ratingsMap = new Map<string, any>((ratingsData || []).map((r: any) => [r.product_id, r]));
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name || "Uncategorized",
-      seller_name: item.profiles?.full_name || "Unknown Seller",
-      seller_business_name: item.profiles?.business_name || "N/A",
-    })) as Product[];
+    return data.map((item: any) => {
+      const rating = ratingsMap.get(item.id) || { average_rating: 0, reviews_count: 0 };
+      return {
+        ...item,
+        category_name: item.categories?.name || "Uncategorized",
+        seller_name: item.profiles?.full_name || "Unknown Seller",
+        seller_business_name: item.profiles?.business_name || "N/A",
+        average_rating: Number(rating.average_rating || 0),
+        reviews_count: Number(rating.reviews_count || 0),
+      };
+    }) as Product[];
   },
 
   async getRelatedProducts(categoryId: string, excludeId: string, limit = 4) {
@@ -403,12 +462,21 @@ export const productService = {
 
     if (error) throw new Error(error.message);
 
+    // Fetch rating aggregates
+    const { data: ratingsData } = await supabase.from("product_ratings").select("*");
+    const ratingsMap = new Map<string, any>((ratingsData || []).map((r: any) => [r.product_id, r]));
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name || "Uncategorized",
-      seller_name: item.profiles?.full_name || "Unknown Seller",
-      seller_business_name: item.profiles?.business_name || "N/A",
-    })) as Product[];
+    return data.map((item: any) => {
+      const rating = ratingsMap.get(item.id) || { average_rating: 0, reviews_count: 0 };
+      return {
+        ...item,
+        category_name: item.categories?.name || "Uncategorized",
+        seller_name: item.profiles?.full_name || "Unknown Seller",
+        seller_business_name: item.profiles?.business_name || "N/A",
+        average_rating: Number(rating.average_rating || 0),
+        reviews_count: Number(rating.reviews_count || 0),
+      };
+    }) as Product[];
   },
 };

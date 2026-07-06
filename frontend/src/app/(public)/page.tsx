@@ -27,6 +27,7 @@ const mapProductToMock = (p: Product): MockProduct => ({
   id: p.id,
   name: p.name,
   description: p.description,
+  configuration: p.configuration,
   price: Number(p.price),
   discount: Number(p.discount),
   stock: p.stock,
@@ -35,8 +36,8 @@ const mapProductToMock = (p: Product): MockProduct => ({
   category: p.category_name || "Uncategorized",
   categoryId: p.category_id,
   sellerName: p.seller_business_name || p.seller_name || "Merchant",
-  rating: 4.8, // static proxy as per PRD (no reviews section built yet)
-  reviewsCount: 24, // static proxy
+  rating: p.average_rating !== undefined ? Number(p.average_rating) : 4.8,
+  reviewsCount: p.reviews_count !== undefined ? Number(p.reviews_count) : 24,
 });
 
 export const revalidate = 60; // Revalidate static cache every minute
@@ -51,9 +52,15 @@ export default async function HomePage() {
     const featuredData = await productService.getFeaturedProducts(8);
     featuredProducts = featuredData.map(mapProductToMock);
 
-    const arrivalsData = await productService.getNewArrivals(8);
-    newArrivals = arrivalsData.map(mapProductToMock).slice(0, 4);
-    bestSellers = arrivalsData.map(mapProductToMock).slice(4, 8); // fallback as proxy for best sellers
+    // Fetch more arrivals to filter out featured items and avoid duplicate display
+    const arrivalsData = await productService.getNewArrivals(16);
+    const featuredIds = new Set(featuredProducts.map(p => p.id));
+    const filteredArrivals = arrivalsData
+      .map(mapProductToMock)
+      .filter(p => !featuredIds.has(p.id));
+
+    newArrivals = filteredArrivals.slice(0, 4);
+    bestSellers = filteredArrivals.slice(4, 8); // fallback as proxy for best sellers
 
     const categoriesData = await categoryService.getCategories();
     popularCategories = categoriesData.slice(0, 6).map((c) => {

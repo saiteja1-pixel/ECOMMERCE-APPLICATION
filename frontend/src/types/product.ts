@@ -15,6 +15,7 @@ export interface Product {
   rejection_reason: string | null;
   image_url: string | null;
   images: string[];
+  configuration?: string | null;
   created_at: string;
   updated_at: string;
 
@@ -22,6 +23,8 @@ export interface Product {
   category_name?: string;
   seller_name?: string;
   seller_business_name?: string;
+  average_rating?: number;
+  reviews_count?: number;
 }
 
 export interface ProductModerationData extends Product {
@@ -35,6 +38,7 @@ export interface MockProduct {
   id: string;
   name: string;
   description: string;
+  configuration?: string | null;
   category: string;
   categoryId: string;
   price: number;

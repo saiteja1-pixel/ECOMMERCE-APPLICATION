@@ -91,9 +91,9 @@ export default function SellerProductsPage() {
         const finalPrice = discount > 0 ? price * (1 - discount / 100) : price;
         return (
           <div>
-            <p className="font-bold text-foreground">${finalPrice.toFixed(2)}</p>
+            <p className="font-bold text-foreground">₹{finalPrice.toFixed(2)}</p>
             {discount > 0 && (
-              <span className="text-[10px] text-red-500 line-through">${price.toFixed(2)}</span>
+              <span className="text-[10px] text-red-500 line-through">₹{price.toFixed(2)}</span>
             )}
           </div>
         );

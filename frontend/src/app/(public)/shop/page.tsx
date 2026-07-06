@@ -18,6 +18,7 @@ interface SearchParams {
   search?: string;
   sort?: string;
   page?: string;
+  min_rating?: string;
 }
 
 interface ShopPageProps {
@@ -34,6 +35,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const search = params.search || "";
   const sort = params.sort || "latest";
   const page = params.page ? Number(params.page) : 1;
+  const minRating = params.min_rating ? Number(params.min_rating) : undefined;
 
   // Fetch initial data server-side
   let categories: Category[] = [];
@@ -50,6 +52,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       sort,
       page,
       limit: 12,
+      minRating,
     });
   } catch (err) {
     console.error("Shop SSR fetch error:", err);

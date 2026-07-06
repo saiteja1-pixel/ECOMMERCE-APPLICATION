@@ -411,7 +411,7 @@ export default function SellerInventoryPage({ searchParams }: { searchParams?: P
                   <Button
                     type="submit"
                     disabled={isRestocking}
-                    className="bg-purple-650 hover:bg-purple-750 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
                   >
                     {isRestocking && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     Confirm Restock

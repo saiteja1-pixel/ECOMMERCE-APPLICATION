@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, DollarSign, ShoppingCart, Package, BarChart3, TrendingUp, Award } from "lucide-react";
+import { Loader2, IndianRupee, ShoppingCart, Package, BarChart3, TrendingUp, Award } from "lucide-react";
 import { KPICard } from "@/components/shared/kpi-card";
 import { LineChart } from "@/components/charts/line-chart";
 import { BarChart } from "@/components/charts/bar-chart";
@@ -77,8 +77,8 @@ export default function SellerAnalyticsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KPICard
             title="Lifetime Revenue"
-            value={`$${Number(kpis?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            icon={<DollarSign className="h-4 w-4" />}
+            value={`₹${Number(kpis?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            icon={<IndianRupee className="h-4 w-4" />}
           />
           <KPICard
             title="Total Orders"
@@ -87,7 +87,7 @@ export default function SellerAnalyticsPage() {
           />
           <KPICard
             title="Average Order Value"
-            value={`$${Number(kpis && kpis.totalOrders > 0 ? kpis.totalRevenue / kpis.totalOrders : 0).toFixed(2)}`}
+            value={`₹${Number(kpis && kpis.totalOrders > 0 ? kpis.totalRevenue / kpis.totalOrders : 0).toFixed(2)}`}
             icon={<TrendingUp className="h-4 w-4" />}
           />
           <KPICard

@@ -13,4 +13,5 @@ export interface CartItem {
   product_stock: number;
   seller_id: string;
   seller_name: string;
+  selected_configuration?: string | null;
 }

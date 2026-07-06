@@ -20,6 +20,7 @@ export const orderService = {
         : item.product_price,
       product_name: item.product_name,
       product_image: item.product_image,
+      selected_configuration: item.selected_configuration || null,
     }));
 
     // Invoke our postgres RPC database transaction helper

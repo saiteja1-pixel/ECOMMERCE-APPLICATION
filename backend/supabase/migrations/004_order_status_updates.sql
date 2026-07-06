@@ -122,4 +122,4 @@ BEGIN
     'new_status', p_new_status
   );
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

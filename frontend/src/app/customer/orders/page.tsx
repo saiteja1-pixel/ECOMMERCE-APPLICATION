@@ -7,11 +7,11 @@ import {
   ShoppingBag,
   ChevronRight,
   Calendar,
-  DollarSign,
+  IndianRupee,
   Loader2,
   Store,
 } from "lucide-react";
-import { CustomerDashboardLayout } from "@/components/layout/customer-dashboard-layout";
+
 import { StatusBadge } from "@/components/shared/status-badge";
 import { orderService } from "@/services/order-service";
 import type { Order } from "@/types/order";
@@ -49,8 +49,7 @@ export default function CustomerOrdersPage() {
   }, [activeTab]);
 
   return (
-    <CustomerDashboardLayout>
-      <div className="space-y-6 font-sans select-none">
+    <div className="space-y-6 font-sans select-none">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading">
@@ -140,7 +139,7 @@ export default function CustomerOrdersPage() {
                     <div className="shrink-0 sm:text-right">
                       <p className="text-[10px] text-muted-foreground">Total items count: {itemsCount}</p>
                       <p className="text-base font-bold text-foreground font-mono flex items-center gap-0.5 pt-0.5">
-                        <DollarSign className="h-4 w-4 shrink-0 text-slate-500" />
+                        <IndianRupee className="h-4 w-4 shrink-0 text-slate-500" />
                         {Number(order.total).toFixed(2)}
                       </p>
                     </div>
@@ -188,6 +187,5 @@ export default function CustomerOrdersPage() {
           </div>
         )}
       </div>
-    </CustomerDashboardLayout>
   );
 }

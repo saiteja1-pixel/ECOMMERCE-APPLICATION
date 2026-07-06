@@ -12,7 +12,7 @@ import {
   Edit2,
   Loader2,
 } from "lucide-react";
-import { CustomerDashboardLayout } from "@/components/layout/customer-dashboard-layout";
+
 import { addressService } from "@/services/address-service";
 import { addressSchema } from "@/lib/validators/checkout";
 import type { Address } from "@/types/address";
@@ -152,17 +152,14 @@ export default function CustomerAddressesPage() {
 
   if (isLoading) {
     return (
-      <CustomerDashboardLayout>
-        <div className="flex items-center justify-center py-20 font-sans">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-650" />
-        </div>
-      </CustomerDashboardLayout>
+      <div className="flex items-center justify-center py-20 font-sans">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-650" />
+      </div>
     );
   }
 
   return (
-    <CustomerDashboardLayout>
-      <div className="space-y-6 font-sans select-none pb-12">
+    <div className="space-y-6 font-sans select-none pb-12">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-border pb-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading">
@@ -175,7 +172,7 @@ export default function CustomerAddressesPage() {
 
           <Button
             onClick={handleOpenAdd}
-            className="bg-purple-650 hover:bg-purple-750 text-white rounded-xl text-xs gap-1.5 h-10 px-4 cursor-pointer font-bold"
+            className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs gap-1.5 h-10 px-4 cursor-pointer font-bold"
           >
             <Plus className="h-4 w-4" />
             Add Address
@@ -374,7 +371,7 @@ export default function CustomerAddressesPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-purple-650 hover:bg-purple-750 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
                 >
                   {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Save Shipping Address
@@ -384,6 +381,5 @@ export default function CustomerAddressesPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </CustomerDashboardLayout>
   );
 }

@@ -28,8 +28,8 @@ export function useCart() {
 
   // 3. Add to Cart mutation
   const addToCartMutation = useMutation({
-    mutationFn: ({ productId, qty }: { productId: string; qty: number }) =>
-      cartService.addToCart(productId, qty),
+    mutationFn: ({ productId, qty, selectedConfig }: { productId: string; qty: number; selectedConfig?: string }) =>
+      cartService.addToCart(productId, qty, selectedConfig),
     onSuccess: () => {
       // Invalidate queries to trigger refresh
       queryClient.invalidateQueries({ queryKey: CART_ITEMS_KEY });

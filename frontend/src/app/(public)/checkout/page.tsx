@@ -27,9 +27,34 @@ import { addressSchema, type AddressFormValues } from "@/lib/validators/checkout
 import type { Address } from "@/types/address";
 import type { CartItem } from "@/types/cart";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false);
+      return;
+    }
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { isAuthenticated, isLoading: isAuthLoading, role, user, profile } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
@@ -43,6 +68,8 @@ export default function CheckoutPage() {
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
+  const [showMockRazorpay, setShowMockRazorpay] = useState(false);
+  const [mockRazorpayOptions, setMockRazorpayOptions] = useState<any>(null);
 
   // Zod form for new address inputs
   const {
@@ -96,6 +123,31 @@ export default function CheckoutPage() {
 
     loadCheckoutData();
   }, [router]);
+
+  // Guard: Role restriction check
+  if (!isAuthLoading && isAuthenticated && role !== "customer") {
+    return (
+      <div className="container max-w-md mx-auto px-4 py-20 text-center font-sans">
+        <div className="space-y-6 bg-card border border-border p-8 rounded-3xl shadow-sm">
+          <div className="h-16 w-16 bg-red-50 dark:bg-red-950/20 text-red-650 rounded-full flex items-center justify-center mx-auto">
+            <Lock className="h-8 w-8 text-red-650" />
+          </div>
+          <h2 className="text-2xl font-extrabold tracking-tight text-foreground font-heading">
+            Access Restricted
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Only customer accounts can check out and place orders. Since your account role is "{role}", you cannot complete checkout.
+          </p>
+          <Button
+            onClick={() => router.push(role === "admin" ? "/admin/dashboard" : "/seller/dashboard")}
+            className="w-full bg-purple-600 hover:bg-purple-750 text-white rounded-xl h-11 font-bold cursor-pointer"
+          >
+            Go to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddAddress = async (data: AddressFormValues) => {
     setIsSubmittingAddress(true);
@@ -159,14 +211,89 @@ export default function CheckoutPage() {
       }
     }
 
+    if (paymentMethod === "upi") {
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_dummykey123";
+      const isDummyKey = !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 
+                         process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID === "rzp_test_dummykey123";
+
+      const options = {
+        key: razorpayKey,
+        amount: Math.round(total * 100), // Amount in paise
+        currency: "INR",
+        name: "EcoShop",
+        description: "Payment for Order",
+        handler: async function (response: any) {
+          try {
+            const addressWithPayment = {
+              ...activeAddress,
+              payment_method: "UPI",
+              payment_details: {
+                upi_id: upiId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature || null,
+              },
+            };
+
+            const createdOrderIds = await orderService.placeOrder(addressWithPayment, cartItems);
+            toast.success("Payment successful! Order placed.");
+            router.push(`/checkout/confirmation/${createdOrderIds[0]}`);
+          } catch (err: unknown) {
+            const error = err as Error;
+            toast.error(error.message || "Failed to place order after payment. Please contact support.");
+          } finally {
+            setIsPlacingOrder(false);
+          }
+        },
+        prefill: {
+          name: profile?.full_name || "",
+          email: user?.email || "",
+          contact: activeAddress.phone || "",
+          method: "upi",
+          vpa: upiId,
+        },
+        notes: {
+          address: `${activeAddress.address_line_1}, ${activeAddress.city}, ${activeAddress.state} - ${activeAddress.pincode}`,
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment modal cancelled.");
+            setIsPlacingOrder(false);
+          },
+        },
+      };
+
+      if (isDummyKey) {
+        setIsPlacingOrder(true);
+        setMockRazorpayOptions(options);
+        setShowMockRazorpay(true);
+        return;
+      }
+
+      setIsPlacingOrder(true);
+      const sdkLoaded = await loadRazorpayScript();
+      if (!sdkLoaded) {
+        toast.error("Failed to load Razorpay SDK. Please check your internet connection.");
+        setIsPlacingOrder(false);
+        return;
+      }
+
+      const rzp = new (window as any).Razorpay({
+        ...options,
+        image: "https://cdn-icons-png.flaticon.com/512/10149/10149458.png",
+        theme: {
+          color: "#7c3aed",
+        }
+      });
+      rzp.open();
+      return;
+    }
+
     const addressWithPayment = {
       ...activeAddress,
       payment_method: paymentMethod.toUpperCase(),
-      payment_details: paymentMethod === "upi" 
-        ? { upi_id: upiId } 
-        : paymentMethod === "card" 
-          ? { card_number: `**** **** **** ${cardNumber.slice(-4)}` }
-          : null
+      payment_details: paymentMethod === "card" 
+        ? { card_number: `**** **** **** ${cardNumber.slice(-4)}` }
+        : null
     };
 
     setIsPlacingOrder(true);
@@ -677,11 +804,18 @@ export default function CheckoutPage() {
                         </div>
                         <div>
                           <h4 className="font-bold text-xs text-foreground truncate max-w-sm">{item.product_name}</h4>
-                          <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ${effectivePrice.toFixed(2)}</p>
+                          <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ₹{effectivePrice.toFixed(2)}</p>
+                          {item.selected_configuration && (
+                            <div className="pt-0.5">
+                              <span className="text-[9px] text-purple-655 bg-purple-50 dark:bg-purple-950/20 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-950/30 inline-block font-semibold">
+                                Config: {item.selected_configuration}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <span className="font-sans font-bold text-sm text-foreground shrink-0">
-                        ${(effectivePrice * item.quantity).toFixed(2)}
+                        ₹{(effectivePrice * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   );
@@ -721,7 +855,7 @@ export default function CheckoutPage() {
             <div className="space-y-3 text-xs select-none">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span>Items Subtotal</span>
-                <span className="font-semibold text-foreground font-mono">${subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-foreground font-mono">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between text-muted-foreground">
                 <span>Postage/Shipping</span>
@@ -729,7 +863,7 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between font-bold text-sm text-foreground">
                 <span>Final total price</span>
-                <span className="font-mono">${total.toFixed(2)}</span>
+                <span className="font-mono">₹{total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -745,6 +879,109 @@ export default function CheckoutPage() {
           </div>
         </aside>
       </div>
+
+      {showMockRazorpay && mockRazorpayOptions && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-sans">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800">
+            {/* Header banner */}
+            <div className="bg-[#0b192e] text-white p-5 flex flex-col justify-between relative">
+              {/* Test Mode Badge */}
+              <div className="absolute top-4 right-4 bg-amber-500 text-slate-950 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider shadow">
+                Test Mode
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-purple-650 rounded-xl flex items-center justify-center font-bold text-white shadow-md text-lg">
+                  E
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm tracking-wide text-slate-100">{mockRazorpayOptions.name}</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">{mockRazorpayOptions.description}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-baseline justify-between border-t border-slate-800 pt-4">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Amount to Pay</span>
+                <span className="text-2xl font-black text-white font-mono">₹{total.toLocaleString('en-IN')}.00</span>
+              </div>
+            </div>
+
+            {/* Content area */}
+            <div className="p-6 space-y-5">
+              {/* Prefill details bar */}
+              <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center text-[10.5px]">
+                <div className="space-y-0.5">
+                  <span className="block font-bold text-slate-700 dark:text-slate-300">{mockRazorpayOptions.prefill.name || "Guest User"}</span>
+                  <span className="block text-slate-400">{mockRazorpayOptions.prefill.email} • {mockRazorpayOptions.prefill.contact}</span>
+                </div>
+                <div className="text-[10px] font-bold text-purple-650 bg-purple-50 dark:bg-purple-950/20 px-2.5 py-1 rounded-lg animate-pulse">
+                  UPI Payment
+                </div>
+              </div>
+
+              {/* UPI visual info */}
+              <div className="border border-purple-100 dark:border-purple-900/30 bg-purple-50/20 dark:bg-purple-950/5 rounded-xl p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-655/10 flex items-center justify-center font-bold text-purple-655 text-xs">
+                    upi
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase text-slate-450 tracking-wider">Selected VPA / UPI ID</span>
+                    <span className="block text-xs font-bold text-slate-850 dark:text-slate-200 font-mono">{mockRazorpayOptions.prefill.vpa}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="text-center space-y-1 py-1">
+                <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Simulate Payment Transaction</p>
+                <p className="text-[10px] text-slate-400">This is a sandbox test. You can simulate either success or failure to test the app integration.</p>
+              </div>
+
+              {/* Simulation buttons */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const mockPaymentId = `pay_mock_${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
+                    setShowMockRazorpay(false);
+                    mockRazorpayOptions.handler({
+                      razorpay_payment_id: mockPaymentId,
+                      razorpay_order_id: null,
+                      razorpay_signature: null
+                    });
+                  }}
+                  className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  Simulate Success
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMockRazorpay(false);
+                    mockRazorpayOptions.modal.ondismiss();
+                  }}
+                  className="w-full h-11 bg-red-600 hover:bg-red-750 text-white rounded-xl font-extrabold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  Simulate Failure
+                </button>
+              </div>
+            </div>
+
+            {/* Footer with branding */}
+            <div className="bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400">Sandbox Environment</span>
+              <div className="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                <span>Secured by</span>
+                <span className="font-extrabold tracking-tight text-blue-600 flex items-center gap-0.5">
+                  <span className="italic">Razorpay</span>
+                  <span className="text-[8px] bg-blue-600 text-white rounded px-1 py-0.5 font-sans font-black scale-90">MOCK</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

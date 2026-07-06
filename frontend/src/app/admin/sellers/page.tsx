@@ -14,7 +14,7 @@ import {
   Trash2,
   User,
   ShoppingBag,
-  DollarSign,
+  IndianRupee,
   Building,
   Mail,
   Phone,
@@ -322,9 +322,9 @@ export default function AdminSellersPage() {
                         <CheckCircle className="h-4 w-4" />
                         Approve Seller
                       </button>
-                      <button
+                       <button
                         onClick={() => triggerAction(selectedSeller, "reject")}
-                        className="flex items-center justify-center gap-1 bg-red-650 hover:bg-red-750 text-white font-bold p-2.5 rounded-lg text-xs cursor-pointer transition-colors"
+                        className="flex items-center justify-center gap-1 bg-red-600 hover:bg-red-700 text-white font-bold p-2.5 rounded-lg text-xs cursor-pointer transition-colors"
                       >
                         <XCircle className="h-4 w-4" />
                         Reject Application
@@ -345,7 +345,7 @@ export default function AdminSellersPage() {
                   {selectedSeller.status === "suspended" && (
                     <button
                       onClick={() => triggerAction(selectedSeller, "reactivate")}
-                      className="col-span-2 flex items-center justify-center gap-1 bg-purple-600 hover:bg-purple-750 text-white font-bold p-2.5 rounded-lg text-xs cursor-pointer transition-colors"
+                      className="col-span-2 flex items-center justify-center gap-1 bg-purple-600 hover:bg-purple-700 text-white font-bold p-2.5 rounded-lg text-xs cursor-pointer transition-colors"
                     >
                       <RotateCcw className="h-4 w-4" />
                       Reactivate Merchant
@@ -386,11 +386,11 @@ export default function AdminSellersPage() {
 
                 <div className="bg-slate-50/40 p-4 border border-border rounded-xl text-center">
                   <p className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 inline-block">
-                    <DollarSign className="h-4.5 w-4.5" />
+                    <IndianRupee className="h-4.5 w-4.5" />
                   </p>
                   <p className="text-[10px] text-muted-foreground font-semibold mt-1">Revenue</p>
                   <p className="text-sm font-extrabold text-foreground font-mono leading-none mt-1.5 truncate">
-                    ${Number(selectedSeller.total_revenue || 0).toFixed(2)}
+                    ₹{Number(selectedSeller.total_revenue || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -482,8 +482,8 @@ export default function AdminSellersPage() {
                     className={cn(
                       "rounded-lg h-9 text-xs font-bold cursor-pointer text-white",
                       actionType === "delete" || actionType === "reject" || actionType === "suspend"
-                        ? "bg-red-650 hover:bg-red-750"
-                        : "bg-purple-650 hover:bg-purple-750"
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-purple-600 hover:bg-purple-700"
                     )}
                   >
                     {isSubmittingAction && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

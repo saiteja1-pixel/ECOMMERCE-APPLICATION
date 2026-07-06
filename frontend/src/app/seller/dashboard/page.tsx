@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Loader2,
-  DollarSign,
+  IndianRupee,
   ShoppingCart,
   Package,
   Clock,
@@ -126,9 +126,9 @@ export default function SellerDashboardPage() {
             />
             <KPICard
               title="Monthly Revenue"
-              value={`$${Number(kpis.monthlyRevenue).toFixed(2)}`}
+              value={`₹${Number(kpis.monthlyRevenue).toFixed(2)}`}
               trend={kpis.revenueTrend}
-              icon={<DollarSign className="h-4 w-4" />}
+              icon={<IndianRupee className="h-4 w-4" />}
             />
             <KPICard
               title="Pending"
@@ -210,7 +210,7 @@ export default function SellerDashboardPage() {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="font-bold text-foreground font-mono">${Number(o.total).toFixed(2)}</p>
+                      <p className="font-bold text-foreground font-mono">₹{Number(o.total).toFixed(2)}</p>
                       <div className="mt-1 scale-90 origin-right">
                         <StatusBadge status={o.status} />
                       </div>

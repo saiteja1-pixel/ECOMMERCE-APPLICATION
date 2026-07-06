@@ -364,7 +364,7 @@ export default function AdminProductsPage() {
               <div className="grid grid-cols-3 gap-4 border-y border-border py-4">
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-bold">List Price</span>
-                  <p className="font-extrabold text-foreground text-sm">${Number(selectedProduct.price).toFixed(2)}</p>
+                  <p className="font-extrabold text-foreground text-sm">₹{Number(selectedProduct.price).toFixed(2)}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-bold">Discount</span>
@@ -411,7 +411,7 @@ export default function AdminProductsPage() {
                 <Button
                   onClick={(e) => openRejectDialog(selectedProduct.id, e)}
                   variant="outline"
-                  className="flex-1 border-red-200 text-red-650 hover:bg-red-50 hover:text-red-750 gap-1.5 cursor-pointer text-xs h-9.5"
+                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-1.5 cursor-pointer text-xs h-9.5"
                 >
                   <CloseIcon className="h-4 w-4" />
                   Reject Submission
@@ -461,7 +461,7 @@ export default function AdminProductsPage() {
                 <Button
                   type="submit"
                   disabled={submittingReject}
-                  className="bg-red-650 hover:bg-red-700 text-white gap-2 cursor-pointer"
+                  className="bg-red-600 hover:bg-red-700 text-white gap-2 cursor-pointer"
                 >
                   {submittingReject && <Loader2 className="h-4 w-4 animate-spin" />}
                   Submit Rejection

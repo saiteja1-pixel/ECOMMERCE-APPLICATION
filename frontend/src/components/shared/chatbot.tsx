@@ -21,8 +21,8 @@ export function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Exclude rendering the chatbot on auth pages to maintain clean flow
-  const isAuthPage = pathname?.startsWith("/auth");
+  // Strictly only render the chatbot on customer panel pages to maintain clean public pages
+  const isCustomerPage = pathname?.startsWith("/customer");
 
   // Load initial greeting
   useEffect(() => {
@@ -51,7 +51,7 @@ You can ask me to:
     }
   }, [messages, isOpen]);
 
-  if (isAuthPage) return null;
+  if (!isCustomerPage) return null;
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;

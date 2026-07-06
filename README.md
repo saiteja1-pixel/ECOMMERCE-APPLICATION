@@ -13,6 +13,7 @@ When evaluating or testing account registrations (Signups), you might encounter 
 *   **How to test immediately (No registration needed):** We have pre-seeded active accounts in the database for each user persona. Please use these credentials directly on the Login Page (`/auth/login`) to bypass the signup limit:
     *   **Platform Admin:** `tejakarthi65@gmail.com` | Password: `Saiteja@1`
     *   **Merchant Seller:** `seller@commercehub.com` | Password: `Saiteja@1`
+    *   **Customer Buyer:** `richard@gmail.com` | Password: `Password123`
 *   **How to turn off this limit in Supabase (For full testing):** If you are running the project connected to your own Supabase instance and wish to register multiple test accounts in succession:
     1. Go to your **Supabase Dashboard** $\rightarrow$ **Authentication** $\rightarrow$ **Providers** $\rightarrow$ **Email**.
     2. Toggle **"Confirm email"** to **OFF** (this bypasses sending verification emails and automatically activates signups).
@@ -39,9 +40,11 @@ You can register any new account as a Seller via the UI, or use this pre-seeded 
 *   **Dashboard Features:** Manage product inventory, adjust stock counts, track store-specific sales, view stock threshold warnings, and fulfill customer orders.
 
 ### 3. Customer (Buyer)
-*   **Registration:** Natively signup via `/auth/register` (Customer is the default tab).
+Use these pre-seeded customer credentials to log in, or register a new account:
+*   **Email:** `richard@gmail.com`
+*   **Password:** `Password123`
 *   **Redirect Target:** Storefront Homepage `/`
-*   **Account Features:** Manage cart items, place checkout orders (Cash on Delivery), maintain a personal wishlist, and track order fulfillment history.
+*   **Account Features:** Manage cart items, place checkout orders (Cash on Delivery & Razorpay UPI Sandbox), maintain a personal wishlist, and track order fulfillment history.
 
 ---
 
@@ -134,11 +137,19 @@ Inside **Supabase Dashboard → Storage**, create two public buckets:
 Set access policies to allow read access to everyone, and upload/write access to authenticated users.
 
 ### 3. Connect Frontend Env Config
-Create a `.env.local` inside the `frontend` folder and paste your Supabase credentials:
+Create a `.env.local` inside the `frontend` folder and paste your Supabase & Razorpay credentials:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_dummykey123
 ```
+
+> [!NOTE]
+> **Vercel / Production Deployment Env Setup**:
+> If you are deploying the frontend on Vercel, make sure you configure the environment variables in your Vercel Project Settings:
+> 1. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+> 2. Add `NEXT_PUBLIC_RAZORPAY_KEY_ID`. Set the value to `rzp_test_dummykey123` to enable the built-in sandbox mock payment overlay, or set it to your real Razorpay Test Key ID to connect with live test servers.
+> When you push changes to GitHub, Vercel will automatically redeploy the application with these variables.
 
 ### 4. Run Locally
 Execute these commands in your terminal:

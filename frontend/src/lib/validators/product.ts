@@ -12,6 +12,7 @@ export const productSchema = z.object({
   status: z.enum(["draft", "active", "pending_approval", "rejected", "deleted"]).default("draft"),
   image_url: z.string().optional().nullable(),
   images: z.array(z.string()).default([]),
+  configuration: z.string().optional().nullable(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

@@ -10,7 +10,7 @@ import {
   Calendar,
   User,
   ShoppingBag,
-  DollarSign,
+  IndianRupee,
   ClipboardList,
   Store,
 } from "lucide-react";
@@ -191,7 +191,7 @@ export default function AdminOrdersPage() {
       header: "Total Invoice",
       cell: ({ row }) => (
         <span className="font-mono font-bold text-foreground">
-          ${Number(row.getValue("total")).toFixed(2)}
+          ₹{Number(row.getValue("total")).toFixed(2)}
         </span>
       ),
     },
@@ -381,7 +381,7 @@ export default function AdminOrdersPage() {
                       <Button
                         onClick={handleStatusChange}
                         disabled={isUpdatingStatus}
-                        className="w-full bg-purple-600 hover:bg-purple-750 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-9 text-xs font-bold cursor-pointer"
                       >
                         {isUpdatingStatus && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                         Apply Admin Status Override
@@ -442,11 +442,11 @@ export default function AdminOrdersPage() {
                         </div>
                         <div className="overflow-hidden">
                           <p className="font-bold text-xs text-foreground truncate max-w-[200px]">{item.product_name}</p>
-                          <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ${Number(item.price).toFixed(2)}</p>
+                          <p className="text-[10px] text-muted-foreground">Qty: {item.quantity} x ₹{Number(item.price).toFixed(2)}</p>
                         </div>
                       </div>
                       <span className="font-sans font-bold text-xs text-foreground shrink-0 font-mono">
-                        ${Number(item.total).toFixed(2)}
+                        ₹{Number(item.total).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -454,7 +454,7 @@ export default function AdminOrdersPage() {
                   <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 text-xs text-muted-foreground flex justify-between font-bold text-foreground border-t border-border">
                     <span>Order Total Invoice</span>
                     <span className="font-mono flex items-center">
-                      <DollarSign className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                      <IndianRupee className="h-3.5 w-3.5 shrink-0 text-slate-500" />
                       {Number(selectedOrder.total).toFixed(2)}
                     </span>
                   </div>

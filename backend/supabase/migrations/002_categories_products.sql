@@ -73,6 +73,11 @@ CREATE POLICY "Sellers can insert own products" ON public.products
     )
   );
 
+CREATE OR REPLACE FUNCTION public.get_old_product_status(p_id UUID) 
+RETURNS TEXT AS $$
+  SELECT status FROM public.products WHERE id = p_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
 CREATE POLICY "Sellers can update own products" ON public.products
   FOR UPDATE TO authenticated
   USING (seller_id = auth.uid())
@@ -82,7 +87,7 @@ CREATE POLICY "Sellers can update own products" ON public.products
     (
       status = 'draft' OR 
       status = 'pending_approval' OR 
-      status = (SELECT status FROM public.products WHERE id = products.id)
+      status = public.get_old_product_status(id)
     )
   );
 

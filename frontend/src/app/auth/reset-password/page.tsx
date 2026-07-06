@@ -42,6 +42,7 @@ export default function ResetPasswordPage() {
       });
       router.push(ROUTES.LOGIN);
     } catch (error) {
+      console.error("Password reset error:", error);
       toast.error("Password reset failed", {
         description: getErrorMessage(error, "An error occurred. Please try again."),
       });

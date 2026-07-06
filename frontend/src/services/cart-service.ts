@@ -41,10 +41,11 @@ export const cartService = {
       product_stock: item.products?.stock || 0,
       seller_id: item.products?.seller_id || "",
       seller_name: item.products?.profiles?.business_name || item.products?.profiles?.full_name || "Merchant",
+      selected_configuration: item.selected_configuration,
     })) as CartItem[];
   },
 
-  async addToCart(productId: string, qty = 1) {
+  async addToCart(productId: string, qty = 1, selectedConfig?: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createClient() as any;
     const { data: { user } } = await supabase.auth.getUser();
@@ -61,13 +62,20 @@ export const cartService = {
     if (product.status !== "active") throw new Error("This listing is no longer active.");
     if (product.stock === 0) throw new Error("This product is currently out of stock.");
 
-    // Check if item is already in customer's cart
-    const { data: existing, error: existingError } = await supabase
+    // Check if item is already in customer's cart with the same configuration
+    let existingQuery = supabase
       .from("cart")
       .select("id, quantity")
       .eq("customer_id", user.id)
-      .eq("product_id", productId)
-      .maybeSingle();
+      .eq("product_id", productId);
+
+    if (selectedConfig) {
+      existingQuery = existingQuery.eq("selected_configuration", selectedConfig);
+    } else {
+      existingQuery = existingQuery.is("selected_configuration", null);
+    }
+
+    const { data: existing, error: existingError } = await existingQuery.maybeSingle();
 
     if (existingError) throw new Error(existingError.message);
 
@@ -92,6 +100,7 @@ export const cartService = {
           customer_id: user.id,
           product_id: productId,
           quantity: qty,
+          selected_configuration: selectedConfig || null,
         });
 
       if (insertError) throw new Error(insertError.message);

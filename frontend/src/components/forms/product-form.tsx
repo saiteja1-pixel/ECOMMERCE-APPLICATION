@@ -56,6 +56,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           status: initialData.status,
           image_url: initialData.image_url,
           images: initialData.images,
+          configuration: initialData.configuration || "",
         }
       : {
           name: "",
@@ -69,6 +70,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           status: "draft",
           image_url: null,
           images: [],
+          configuration: "",
         },
   });
 
@@ -165,6 +167,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           category_id: payload.category_id,
           name: payload.name,
           description: payload.description,
+          configuration: payload.configuration || null,
           sku: payload.sku || null,
           price: payload.price,
           discount: payload.discount,
@@ -251,6 +254,23 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 />
                 {errors.description && (
                   <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="prod-config">Product Configuration</Label>
+                <textarea
+                  id="prod-config"
+                  rows={4}
+                  placeholder="Explain options, e.g., Color: Blue, RAM: 16GB, Storage: 512GB SSD..."
+                  {...register("configuration")}
+                  className={cn(
+                    "flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                    errors.configuration ? "border-red-500 focus:ring-red-500" : ""
+                  )}
+                />
+                {errors.configuration && (
+                  <p className="mt-1 text-xs text-red-500">{errors.configuration.message}</p>
                 )}
               </div>
 

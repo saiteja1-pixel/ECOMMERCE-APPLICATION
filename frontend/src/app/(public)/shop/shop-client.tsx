@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Loader2,
   Filter,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ const mapProductToMock = (p: Product): MockProduct => ({
   id: p.id,
   name: p.name,
   description: p.description,
+  configuration: p.configuration,
   price: Number(p.price),
   discount: Number(p.discount),
   stock: p.stock,
@@ -37,8 +39,8 @@ const mapProductToMock = (p: Product): MockProduct => ({
   category: p.category_name || "Uncategorized",
   categoryId: p.category_id,
   sellerName: p.seller_business_name || p.seller_name || "Merchant",
-  rating: 4.8, // static proxy as per PRD (no reviews section built yet)
-  reviewsCount: 18, // static proxy
+  rating: p.average_rating !== undefined ? Number(p.average_rating) : 4.8,
+  reviewsCount: p.reviews_count !== undefined ? Number(p.reviews_count) : 18,
 });
 
 export function ShopClient({ categories, initialProducts, initialCount }: ShopClientProps) {
@@ -58,6 +60,7 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
   const currentInStockOnly = searchParams.get("in_stock") === "true";
   const currentSort = searchParams.get("sort") || "latest";
   const currentPage = Number(searchParams.get("page")) || 1;
+  const currentMinRating = searchParams.get("min_rating") || "";
 
   // General URL update helper
   const updateUrlParams = (updates: Record<string, string | null>) => {
@@ -125,15 +128,22 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
   }
   if (currentMinPrice) {
     activeChips.push({
-      label: `Min Price: $${currentMinPrice}`,
+      label: `Min Price: ₹${currentMinPrice}`,
       key: "min_price",
       value: null,
     });
   }
   if (currentMaxPrice) {
     activeChips.push({
-      label: `Max Price: $${currentMaxPrice}`,
+      label: `Max Price: ₹${currentMaxPrice}`,
       key: "max_price",
+      value: null,
+    });
+  }
+  if (currentMinRating) {
+    activeChips.push({
+      label: `${currentMinRating} Stars & Up`,
+      key: "min_rating",
       value: null,
     });
   }
@@ -268,7 +278,7 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
 
             {/* Price Ranges filter cards */}
             <div className="border-t border-border pt-6 space-y-3">
-              <h3 className="font-heading font-bold text-foreground text-sm">Price Range ($)</h3>
+              <h3 className="font-heading font-bold text-foreground text-sm">Price Range (₹)</h3>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -285,6 +295,61 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
                   onChange={(e) => updateUrlParam("max_price", e.target.value)}
                   className="h-9 text-xs border-border bg-slate-50/50"
                 />
+              </div>
+
+              {/* Price Bracket Quick Links */}
+              <div className="flex flex-col gap-1.5 pt-1.5 text-xs font-semibold">
+                <button
+                  onClick={() => updateUrlParams({ min_price: null, max_price: "1000" })}
+                  className="text-left text-slate-500 hover:text-purple-650 transition-colors cursor-pointer"
+                >
+                  Under ₹1,000
+                </button>
+                <button
+                  onClick={() => updateUrlParams({ min_price: "1000", max_price: "5000" })}
+                  className="text-left text-slate-500 hover:text-purple-650 transition-colors cursor-pointer"
+                >
+                  ₹1,000 - ₹5,000
+                </button>
+                <button
+                  onClick={() => updateUrlParams({ min_price: "5000", max_price: null })}
+                  className="text-left text-slate-500 hover:text-purple-650 transition-colors cursor-pointer"
+                >
+                  Over ₹5,000
+                </button>
+              </div>
+            </div>
+
+            {/* Customer Rating Filter */}
+            <div className="border-t border-border pt-6 space-y-3">
+              <h3 className="font-heading font-bold text-foreground text-sm">Customer Rating</h3>
+              <div className="flex flex-col gap-2.5">
+                {[4, 3, 2, 1].map((rating) => {
+                  const isSelected = currentMinRating === String(rating);
+                  return (
+                    <button
+                      key={rating}
+                      onClick={() => updateUrlParam("min_rating", isSelected ? null : String(rating))}
+                      className={cn(
+                        "flex items-center gap-1.5 text-xs text-left cursor-pointer transition-colors",
+                        isSelected ? "text-purple-600 font-bold" : "text-slate-650 hover:text-purple-650"
+                      )}
+                    >
+                      <div className="flex text-amber-500 gap-0.5">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star
+                            key={idx}
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              idx < rating ? "fill-amber-500 text-amber-500" : "text-slate-300"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span>& Up</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -454,7 +519,7 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
 
               {/* Price */}
               <div className="space-y-2 border-t border-border pt-4">
-                <h4 className="font-heading font-bold text-sm text-foreground">Price Bounds ($)</h4>
+                <h4 className="font-heading font-bold text-sm text-foreground">Price Bounds (₹)</h4>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -470,6 +535,39 @@ export function ShopClient({ categories, initialProducts, initialCount }: ShopCl
                     onChange={(e) => updateUrlParam("max_price", e.target.value)}
                     className="h-10 text-xs border-border"
                   />
+                </div>
+              </div>
+
+              {/* Customer Rating Filter */}
+              <div className="space-y-2 border-t border-border pt-4">
+                <h4 className="font-heading font-bold text-sm text-foreground">Customer Rating</h4>
+                <div className="flex flex-col gap-2.5">
+                  {[4, 3, 2, 1].map((rating) => {
+                    const isSelected = currentMinRating === String(rating);
+                    return (
+                      <button
+                        key={rating}
+                        onClick={() => updateUrlParam("min_rating", isSelected ? null : String(rating))}
+                        className={cn(
+                          "flex items-center gap-1.5 text-xs text-left cursor-pointer transition-colors",
+                          isSelected ? "text-purple-600 font-bold" : "text-slate-650 hover:text-purple-650"
+                        )}
+                      >
+                        <div className="flex text-amber-500 gap-0.5">
+                          {Array.from({ length: 5 }).map((_, idx) => (
+                            <Star
+                              key={idx}
+                              className={cn(
+                                "h-3.5 w-3.5",
+                                idx < rating ? "fill-amber-500 text-amber-500" : "text-slate-300"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span>& Up</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
