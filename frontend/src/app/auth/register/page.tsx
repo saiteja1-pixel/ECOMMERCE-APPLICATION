@@ -54,20 +54,27 @@ export default function RegisterPage() {
   const onSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
     try {
+      // Validate email domain validity via API
+      const validateRes = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email }),
+      });
+      const validateData = await validateRes.json();
+      if (!validateData.valid) {
+        throw new Error(validateData.message || "This email address is invalid.");
+      }
+
       await authService.signUp(values);
 
+      // Force sign out to prevent automatic login (real-world flow requires explicit login)
+      await authService.signOut();
+
       toast.success("Account created successfully!", {
-        description:
-          values.role === "seller"
-            ? "Your merchant account is active! Redirecting to dashboard..."
-            : "You can start shopping now.",
+        description: "Please sign in with your credentials to access your new account.",
       });
 
-      if (values.role === "seller") {
-        router.push(ROUTES.SELLER_DASHBOARD);
-      } else {
-        router.push(ROUTES.HOME);
-      }
+      window.location.href = ROUTES.LOGIN;
     } catch (error) {
       toast.error("Registration failed", {
         description: getErrorMessage(error, "An error occurred during sign up."),

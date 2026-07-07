@@ -295,9 +295,13 @@ BEGIN
     );
   END LOOP;
 
-  -- 3. Clear cart
+  -- 3. Clear checked out items from cart
   DELETE FROM cart 
-  WHERE customer_id = p_customer_id;
+  WHERE id IN (
+    SELECT (value->>'cart_item_id')::uuid 
+    FROM jsonb_array_elements(p_items)
+    WHERE (value->>'cart_item_id') IS NOT NULL
+  );
 
   RETURN jsonb_build_object(
     'success', true,

@@ -57,6 +57,28 @@ export const authService = {
 
   async signOut() {
     const supabase = createClient();
+    
+    // Explicitly wipe client-side storage and session cookies to prevent stale redirects
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i];
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie;
+          if (name.startsWith("sb-") || name.includes("supabase")) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; sameSite=Lax;";
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/auth; sameSite=Lax;";
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error clearing client auth data:", e);
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw error;

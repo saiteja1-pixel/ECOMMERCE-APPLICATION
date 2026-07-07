@@ -44,6 +44,23 @@ export default function CartPage() {
   } = useCart();
 
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  // Sync selected checkout item
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const exists = cartItems.some((i) => i.product_id === selectedItemId || i.id === selectedItemId);
+      if (!exists) {
+        setSelectedItemId(cartItems[0].product_id);
+      }
+    } else {
+      setSelectedItemId(null);
+    }
+  }, [cartItems, selectedItemId]);
+
+  const handleSelectItem = (id: string) => {
+    setSelectedItemId((prev) => (prev === id ? null : id));
+  };
 
   // Load from local storage on mount
   useEffect(() => {
@@ -114,13 +131,19 @@ export default function CartPage() {
 
   const isPageLoading = isAuthLoading || isCartLoading;
 
-  // Calculate pricing subtotals
-  const subtotal = cartItems.reduce((acc, item) => {
-    const effectivePrice = item.product_discount > 0 
-      ? item.product_price * (1 - item.product_discount / 100) 
-      : item.product_price;
-    return acc + (effectivePrice * item.quantity);
-  }, 0);
+  // Calculate pricing subtotals based on selected checkout item
+  const selectedCartItem = cartItems.find(
+    (i) => i.id === selectedItemId || i.product_id === selectedItemId
+  );
+
+  const subtotal = selectedCartItem
+    ? (() => {
+        const effectivePrice = selectedCartItem.product_discount > 0 
+          ? selectedCartItem.product_price * (1 - selectedCartItem.product_discount / 100) 
+          : selectedCartItem.product_price;
+        return effectivePrice * selectedCartItem.quantity;
+      })()
+    : 0;
 
   const shippingCost = 0; // free shipping
   const total = subtotal + shippingCost;
@@ -304,7 +327,18 @@ export default function CartPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left: Cart Items List (65%) */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-4">
+            {cartItems.length > 1 && (
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl text-xs text-amber-800 dark:text-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">⚠️</span>
+                  <div>
+                    <p className="font-bold">Selective Checkout Enforced</p>
+                    <p className="text-[10px] text-amber-600/90 dark:text-amber-400/80 font-medium">You can buy only one item per transaction. Select the checkbox of the item you want to checkout now.</p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="bg-card border border-border rounded-2xl divide-y divide-border overflow-hidden shadow-sm">
               {cartItems.map((item) => {
                 const effectivePrice = item.product_discount > 0 
@@ -312,9 +346,22 @@ export default function CartPage() {
                   : item.product_price;
                 const lineTotal = effectivePrice * item.quantity;
 
+                const isSelected = selectedItemId === item.product_id || selectedItemId === item.id;
+
                 return (
-                  <div key={item.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                  <div key={item.id} className={`p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors ${isSelected ? "bg-purple-50/10 dark:bg-purple-950/5" : "opacity-60"}`}>
                     <div className="flex items-center gap-4 grow">
+                      {/* Selection checkbox */}
+                      <div className="flex items-center shrink-0 pr-1" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          id={`select_${item.id}`}
+                          checked={isSelected}
+                          onChange={() => handleSelectItem(item.product_id)}
+                          className="h-4.5 w-4.5 rounded-full border-slate-300 text-purple-650 focus:ring-purple-500 cursor-pointer transition-all accent-purple-650"
+                        />
+                      </div>
+
                       {/* Image Thumbnail */}
                       <Link href={`/products/${item.product_id}`} className="relative h-20 w-20 rounded-xl overflow-hidden border border-border bg-slate-55 shrink-0 shadow-sm cursor-pointer block">
                         <SafeImage
@@ -473,7 +520,8 @@ export default function CartPage() {
               </div>
 
               <Button
-                onClick={() => router.push("/checkout")}
+                onClick={() => router.push(`/checkout?item=${selectedItemId}`)}
+                disabled={!selectedItemId}
                 className="w-full bg-purple-600 hover:bg-purple-750 text-white rounded-xl h-12 font-bold cursor-pointer gap-2"
               >
                 Proceed to Checkout
@@ -519,7 +567,8 @@ export default function CartPage() {
             </span>
           </div>
           <Button
-            onClick={() => router.push("/checkout")}
+            onClick={() => router.push(`/checkout?item=${selectedItemId}`)}
+            disabled={!selectedItemId}
             className="bg-purple-600 hover:bg-purple-755 text-white grow h-11 text-xs gap-2 font-bold cursor-pointer"
           >
             Checkout

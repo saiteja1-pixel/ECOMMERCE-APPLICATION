@@ -13,7 +13,7 @@ When evaluating or testing account registrations (Signups), you might encounter 
 *   **How to test immediately (No registration needed):** We have pre-seeded active accounts in the database for each user persona. Please use these credentials directly on the Login Page (`/auth/login`) to bypass the signup limit:
     *   **Platform Admin:** `tejakarthi65@gmail.com` | Password: `Saiteja@1`
     *   **Merchant Seller:** `seller@commercehub.com` | Password: `Saiteja@1`
-    *   **Customer Buyer:** `richard@gmail.com` | Password: `Password123`
+    *   **Customer Buyer:** `saiiracharla@gmail.com` | Password: `Saiteja@1`
 *   **How to turn off this limit in Supabase (For full testing):** If you are running the project connected to your own Supabase instance and wish to register multiple test accounts in succession:
     1. Go to your **Supabase Dashboard** $\rightarrow$ **Authentication** $\rightarrow$ **Providers** $\rightarrow$ **Email**.
     2. Toggle **"Confirm email"** to **OFF** (this bypasses sending verification emails and automatically activates signups).
@@ -41,8 +41,8 @@ You can register any new account as a Seller via the UI, or use this pre-seeded 
 
 ### 3. Customer (Buyer)
 Use these pre-seeded customer credentials to log in, or register a new account:
-*   **Email:** `richard@gmail.com`
-*   **Password:** `Password123`
+*   **Email:** `saiiracharla@gmail.com`
+*   **Password:** `Saiteja@1`
 *   **Redirect Target:** Storefront Homepage `/`
 *   **Account Features:** Manage cart items, place checkout orders (Cash on Delivery & Razorpay UPI Sandbox), maintain a personal wishlist, and track order fulfillment history.
 

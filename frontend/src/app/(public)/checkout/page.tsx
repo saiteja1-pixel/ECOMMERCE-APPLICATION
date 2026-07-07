@@ -70,6 +70,8 @@ export default function CheckoutPage() {
   const [cardCvv, setCardCvv] = useState("");
   const [showMockRazorpay, setShowMockRazorpay] = useState(false);
   const [mockRazorpayOptions, setMockRazorpayOptions] = useState<any>(null);
+  const [mockAmountInput, setMockAmountInput] = useState("");
+  const [mockAmountError, setMockAmountError] = useState("");
 
   // Zod form for new address inputs
   const {
@@ -101,7 +103,23 @@ export default function CheckoutPage() {
           router.push("/cart");
           return;
         }
-        setCartItems(items);
+
+        // Read URL search params for selective item checkout
+        const params = new URLSearchParams(window.location.search);
+        const selectedId = params.get("item");
+        
+        if (selectedId) {
+          const filtered = items.filter(
+            (i) => i.id === selectedId || i.product_id === selectedId
+          );
+          if (filtered.length > 0) {
+            setCartItems(filtered);
+          } else {
+            setCartItems(items);
+          }
+        } else {
+          setCartItems(items);
+        }
 
         const addr = await addressService.getAddresses();
         setAddresses(addr);
@@ -935,8 +953,39 @@ export default function CheckoutPage() {
 
               {/* Instructions */}
               <div className="text-center space-y-1 py-1">
-                <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Simulate Payment Transaction</p>
+                <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-heading">Simulate Payment Transaction</p>
                 <p className="text-[10px] text-slate-400">This is a sandbox test. You can simulate either success or failure to test the app integration.</p>
+              </div>
+
+              {/* Amount Entry Input */}
+              <div className="space-y-1.5 text-left bg-slate-50 dark:bg-slate-950/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <Label htmlFor="mock_amount" className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">
+                  Payment Amount
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-xs text-slate-500 font-mono">₹</span>
+                  <Input
+                    id="mock_amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="Enter amount to pay"
+                    value={mockAmountInput}
+                    onChange={(e) => {
+                      setMockAmountInput(e.target.value);
+                      if (mockAmountError) setMockAmountError("");
+                    }}
+                    className="pl-7 h-10 border-border bg-white dark:bg-slate-900 text-xs rounded-xl focus:bg-white font-mono"
+                  />
+                </div>
+                {mockAmountError ? (
+                  <p className="text-[10px] font-bold text-red-600 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {mockAmountError}
+                  </p>
+                ) : (
+                  <p className="text-[9px] text-slate-400">
+                    To authorize the payment, enter the exact order total: <span className="font-bold font-mono text-slate-750 dark:text-slate-200">₹{total.toFixed(2)}</span>
+                  </p>
+                )}
               </div>
 
               {/* Simulation buttons */}
@@ -944,8 +993,20 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    const parsedInput = parseFloat(mockAmountInput);
+                    if (!mockAmountInput || isNaN(parsedInput)) {
+                      setMockAmountError("Please enter the payment amount.");
+                      return;
+                    }
+                    if (Math.abs(parsedInput - total) > 0.01) {
+                      setMockAmountError(`Amount mismatch! You must enter exact required amount of ₹${total.toFixed(2)}.`);
+                      return;
+                    }
+                    
+                    setMockAmountError("");
                     const mockPaymentId = `pay_mock_${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
                     setShowMockRazorpay(false);
+                    setMockAmountInput("");
                     mockRazorpayOptions.handler({
                       razorpay_payment_id: mockPaymentId,
                       razorpay_order_id: null,
@@ -960,6 +1021,8 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={() => {
                     setShowMockRazorpay(false);
+                    setMockAmountInput("");
+                    setMockAmountError("");
                     mockRazorpayOptions.modal.ondismiss();
                   }}
                   className="w-full h-11 bg-red-600 hover:bg-red-750 text-white rounded-xl font-extrabold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"

@@ -71,9 +71,26 @@ function LoginForm() {
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // Validate email domain validity via API
+      const validateRes = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email }),
+      });
+      const validateData = await validateRes.json();
+      if (!validateData.valid) {
+        throw new Error(validateData.message || "This email address is invalid.");
+      }
+
       const authData = await authService.signIn(values);
       if (!authData.user) {
         throw new Error("Failed to sign in. Please try again.");
+      }
+
+      // Check if email has been verified
+      if (!authData.user.email_confirmed_at) {
+        await authService.signOut();
+        throw new Error("Email address not verified. Please check your inbox and verify your email to log in.");
       }
 
       // Fetch user profile to check role and status

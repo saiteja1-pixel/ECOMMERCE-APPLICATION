@@ -16,22 +16,50 @@ export async function GET(request: Request) {
       
       if (user) {
         // Query to check if profile row exists
-        const { data: profile } = await supabase
+        let { data: profile } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, status")
           .eq("id", user.id)
           .maybeSingle();
 
         // If no database profile row exists yet (new Google OAuth sign up),
         // we create a default active 'customer' profile.
         if (!profile) {
-          await supabase.from("profiles").insert({
-            id: user.id,
-            email: user.email!,
-            full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Google User",
-            role: "customer",
-            status: "active",
-          });
+          const { data: newProfile, error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              email: user.email!,
+              full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Google User",
+              role: "customer",
+              status: "active",
+            })
+            .select("role, status")
+            .single();
+          if (!insertError) {
+            profile = newProfile;
+          }
+        }
+
+        // Role-based redirection logic
+        if (profile) {
+          if (profile.role === "admin") {
+            return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+          } else if (profile.role === "seller") {
+            if (profile.status === "active") {
+              return NextResponse.redirect(new URL("/seller/dashboard", request.url));
+            } else if (profile.status === "pending") {
+              return NextResponse.redirect(new URL("/seller/pending", request.url));
+            } else if (profile.status === "suspended") {
+              return NextResponse.redirect(new URL("/seller/suspended", request.url));
+            }
+          } else if (profile.role === "customer") {
+            if (profile.status === "suspended") {
+              await supabase.auth.signOut();
+              return NextResponse.redirect(new URL("/auth/login?error=blocked", request.url));
+            }
+            return NextResponse.redirect(new URL(next === "/" ? "/" : next, request.url));
+          }
         }
       }
       return NextResponse.redirect(new URL(next, request.url));

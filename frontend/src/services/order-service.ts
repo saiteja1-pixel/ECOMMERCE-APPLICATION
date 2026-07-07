@@ -12,6 +12,7 @@ export const orderService = {
     if (!user) throw new Error("Please sign in to place your order.");
 
     const dbItems = cartItems.map((item) => ({
+      cart_item_id: item.id,
       product_id: item.product_id,
       quantity: item.quantity,
       seller_id: item.seller_id,
@@ -23,7 +24,6 @@ export const orderService = {
       selected_configuration: item.selected_configuration || null,
     }));
 
-    // Invoke our postgres RPC database transaction helper
     const { data, error } = await supabase.rpc("place_order_transaction", {
       p_customer_id: user.id,
       p_address: address,

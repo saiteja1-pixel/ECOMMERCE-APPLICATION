@@ -1,5 +1,36 @@
 import { z } from "zod";
 
+const DISPOSABLE_EMAIL_BLACKLIST = [
+  "mailinator.com",
+  "yopmail.com",
+  "tempmail.com",
+  "temp-mail.org",
+  "guerrillamail.com",
+  "10minutemail.com",
+  "dispostable.com",
+  "getairmail.com",
+  "sharklasers.com",
+  "maildrop.cc",
+  "trashmail.com",
+  "fake.com",
+  "test.com",
+  "example.com",
+  "xyz.com"
+];
+
+const emailFieldSchema = z
+  .string()
+  .email("Invalid email address")
+  .refine(
+    (email) => {
+      const domain = email.split("@")[1]?.toLowerCase();
+      return !DISPOSABLE_EMAIL_BLACKLIST.includes(domain);
+    },
+    {
+      message: "This email domain is blocked for safety. Please use a verified standard provider.",
+    }
+  );
+
 const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters long")
@@ -8,14 +39,14 @@ const passwordSchema = z
   .regex(/[0-9]/, "Password must contain at least one number");
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: emailFieldSchema,
   password: z.string().min(1, "Password is required"),
 });
 
 export const registerSchema = z
   .object({
     full_name: z.string().min(2, "Full name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
+    email: emailFieldSchema,
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm password is required"),
     role: z.enum(["customer", "seller"]),
@@ -50,7 +81,7 @@ export const registerSchema = z
   });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: emailFieldSchema,
 });
 
 export const resetPasswordSchema = z
